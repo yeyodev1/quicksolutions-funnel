@@ -32,14 +32,14 @@ const router = createRouter({
       name: 'funnel',
       component: FunnelView,
       meta: {
-        title: 'Ale Barreto | Expertos en Madera — Diseño y Construcción de Alta Gama',
+        title: 'Aluvicopp | Ingeniería Estructural en Vidrio y Aluminio',
         description:
-          'Expertos en diseño y construcción en madera. Transformamos espacios con acabados premium y estructuras sostenibles. Agenda tu asesoría gratuita.',
-        canonical: 'https://alebarreto.com/',
-        ogTitle: 'Ale Barreto | Expertos en Madera',
+          'Especialistas en ingeniería estructural de vidrio templado y aluminio. Transformamos espacios corporativos, clínicas y residencias con precisión suiza. Agenda tu diagnóstico gratuito.',
+        canonical: 'https://aluvicopp.com/',
+        ogTitle: 'Aluvicopp | Ingeniería Estructural de Precisión',
         ogDescription:
-          'Diseño y construcción en madera de alta gama. Calidad artesanal para tus proyectos residenciales y comerciales.',
-        ogUrl: 'https://alebarreto.com/',
+          'Diseño, cálculo e instalación de estructuras de vidrio templado y aluminio de alto impacto. Plusvalía garantizada.',
+        ogUrl: 'https://aluvicopp.com/',
       } satisfies RouteMeta,
     },
     {
@@ -47,12 +47,12 @@ const router = createRouter({
       name: 'video',
       component: VideoView,
       meta: {
-        title: 'Mira el video | Ale Barreto — Paso 1 de 2',
-        description: 'Descubre cómo transformamos espacios con madera de alta gama en nuestro video exclusivo.',
-        canonical: 'https://alebarreto.com/ver-video',
-        ogTitle: 'Mira el video | Ale Barreto',
-        ogDescription: 'Ve el video y agenda tu Cita Estratégica gratuita con Ale Barreto.',
-        ogUrl: 'https://alebarreto.com/ver-video',
+        title: 'Mira el video | Aluvicopp — Paso 1 de 2',
+        description: 'Descubre cómo la ingeniería estructural de precisión protege tu patrimonio. Video exclusivo de Aluvicopp.',
+        canonical: 'https://aluvicopp.com/ver-video',
+        ogTitle: 'Mira el video | Aluvicopp',
+        ogDescription: 'Ve el video y agenda tu diagnóstico estructural gratuito con José de Aluvicopp.',
+        ogUrl: 'https://aluvicopp.com/ver-video',
       } satisfies RouteMeta,
     },
     {
@@ -60,12 +60,12 @@ const router = createRouter({
       name: 'booking',
       component: BookingView,
       meta: {
-        title: 'Agenda tu Cita | Ale Barreto — Paso 2 de 2',
-        description: 'Selecciona el día y hora para tu Cita Estratégica gratuita con Ale Barreto.',
-        canonical: 'https://alebarreto.com/agendar',
-        ogTitle: 'Agenda tu Cita | Ale Barreto',
-        ogDescription: 'Elige tu horario y reserva tu Cita Estratégica gratuita.',
-        ogUrl: 'https://alebarreto.com/agendar',
+        title: 'Agenda tu Diagnóstico | Aluvicopp — Paso 2 de 2',
+        description: 'Selecciona el día y hora para tu Diagnóstico Estructural gratuito con José de Aluvicopp.',
+        canonical: 'https://aluvicopp.com/agendar',
+        ogTitle: 'Agenda tu Diagnóstico | Aluvicopp',
+        ogDescription: 'Elige tu horario y reserva tu Diagnóstico Estructural gratuito.',
+        ogUrl: 'https://aluvicopp.com/agendar',
       } satisfies RouteMeta,
     },
     {
@@ -73,12 +73,12 @@ const router = createRouter({
       name: 'booked',
       component: BookedView,
       meta: {
-        title: 'Cita Confirmada | Ale Barreto',
-        description: 'Tu cita estratégica con Ale Barreto está confirmada. Revisa tu correo y prepárate.',
-        canonical: 'https://alebarreto.com/cita-confirmada',
-        ogTitle: 'Cita Confirmada | Ale Barreto',
-        ogDescription: 'Tu cita está reservada. Te contactaremos pronto.',
-        ogUrl: 'https://alebarreto.com/cita-confirmada',
+        title: 'Diagnóstico Confirmado | Aluvicopp',
+        description: 'Tu diagnóstico estructural con Aluvicopp está confirmado. Revisa tu correo y prepárate.',
+        canonical: 'https://aluvicopp.com/cita-confirmada',
+        ogTitle: 'Diagnóstico Confirmado | Aluvicopp',
+        ogDescription: 'Tu diagnóstico está reservado. Te contactaremos pronto.',
+        ogUrl: 'https://aluvicopp.com/cita-confirmada',
       } satisfies RouteMeta,
     },
     {
@@ -86,12 +86,12 @@ const router = createRouter({
       name: 'no-space',
       component: NoSpaceView,
       meta: {
-        title: 'Sin Espacio Disponible | Ale Barreto',
-        description: 'En este momento los cupos de asesoría de Ale Barreto están completos. Te notificaremos cuando se libere un espacio.',
-        canonical: 'https://alebarreto.com/sin-espacio',
-        ogTitle: 'Sin Espacio Disponible | Ale Barreto',
-        ogDescription: 'Los cupos de asesoría están completos. Te avisaremos cuando haya disponibilidad.',
-        ogUrl: 'https://alebarreto.com/sin-espacio',
+        title: 'Sin Cupos Disponibles | Aluvicopp',
+        description: 'En este momento los cupos de diagnóstico estructural de Aluvicopp están completos. Te notificaremos cuando se libere un espacio.',
+        canonical: 'https://aluvicopp.com/sin-espacio',
+        ogTitle: 'Sin Cupos Disponibles | Aluvicopp',
+        ogDescription: 'Los cupos de diagnóstico están completos. Te avisaremos cuando haya disponibilidad.',
+        ogUrl: 'https://aluvicopp.com/sin-espacio',
       } satisfies RouteMeta,
     },
     {
@@ -99,12 +99,12 @@ const router = createRouter({
       name: 'privacy-policy',
       component: PrivacyPolicyView,
       meta: {
-        title: 'Política de Privacidad | Ale Barreto',
-        description: 'Política de privacidad de Ale Barreto. Información sobre el tratamiento de datos personales.',
-        canonical: 'https://alebarreto.com/politicas-privacidad',
-        ogTitle: 'Política de Privacidad | Ale Barreto',
-        ogDescription: 'Política de privacidad de Ale Barreto.',
-        ogUrl: 'https://alebarreto.com/politicas-privacidad',
+        title: 'Política de Privacidad | Aluvicopp',
+        description: 'Política de privacidad de Aluvicopp. Información sobre el tratamiento de datos personales.',
+        canonical: 'https://aluvicopp.com/politicas-privacidad',
+        ogTitle: 'Política de Privacidad | Aluvicopp',
+        ogDescription: 'Política de privacidad de Aluvicopp.',
+        ogUrl: 'https://aluvicopp.com/politicas-privacidad',
       } satisfies RouteMeta,
     },
     {
@@ -112,12 +112,12 @@ const router = createRouter({
       name: 'legal-notice',
       component: LegalNoticeView,
       meta: {
-        title: 'Aviso Legal | Ale Barreto',
-        description: 'Aviso legal de Ale Barreto. Términos y condiciones de uso del sitio web.',
-        canonical: 'https://alebarreto.com/aviso-legal',
-        ogTitle: 'Aviso Legal | Ale Barreto',
-        ogDescription: 'Aviso legal de Ale Barreto.',
-        ogUrl: 'https://alebarreto.com/aviso-legal',
+        title: 'Aviso Legal | Aluvicopp',
+        description: 'Aviso legal de Aluvicopp. Términos y condiciones de uso del sitio web.',
+        canonical: 'https://aluvicopp.com/aviso-legal',
+        ogTitle: 'Aviso Legal | Aluvicopp',
+        ogDescription: 'Aviso legal de Aluvicopp.',
+        ogUrl: 'https://aluvicopp.com/aviso-legal',
       } satisfies RouteMeta,
     },
   ],
@@ -144,7 +144,7 @@ const setCanonical = (href: string) => {
 
 router.afterEach((to) => {
   const meta = to.meta
-  document.title = meta.title ?? 'Ale Barreto'
+  document.title = meta.title ?? 'Aluvicopp'
   setMeta('description', meta.description ?? '')
   setOgMeta('og:title', meta.ogTitle ?? meta.title ?? '')
   setOgMeta('og:description', meta.ogDescription ?? meta.description ?? '')

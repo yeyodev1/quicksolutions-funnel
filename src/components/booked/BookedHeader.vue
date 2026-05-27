@@ -1,14 +1,10 @@
 <script setup lang="ts">
-/**
- * BookedHeader.vue
- * Dedicated top bar for the confirmation page.
- */
 const LOGO = 'https://res.cloudinary.com/dpuody0df/image/upload/v1775587085/bakano/logos/bakano-light.png';
 </script>
 
 <template>
   <header class="booked-header">
-    <img :src="LOGO" alt="Bakano" class="booked-header__logo" />
+    <h2 class="booked-header__logo-text">ALUVICOPP</h2>
   </header>
 </template>
 
@@ -20,27 +16,19 @@ const LOGO = 'https://res.cloudinary.com/dpuody0df/image/upload/v1775587085/baka
   padding: 1.25rem 1rem;
   display: flex;
   justify-content: center;
-  background: rgba(#0a0712, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(colors.$BAKANO-PURPLE, 0.15);
+  background: colors.$OS-NAVY;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
 
-  &__logo {
-    height: 26px;
-    width: auto;
-    filter: drop-shadow(0 0 12px rgba(colors.$BAKANO-PINK, 0.2));
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.05);
-    }
-
-    @media (min-width: 768px) {
-      height: 32px;
-    }
+  &__logo-text {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+    color: #ffffff;
+    margin: 0;
   }
 }
 </style>

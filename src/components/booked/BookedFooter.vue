@@ -1,13 +1,8 @@
 <script setup lang="ts">
-/**
- * BookedFooter.vue
- * Final section with legal links and copyright.
- */
 </script>
 
 <template>
   <footer class="booked-footer">
-    <!-- Navegación Legal -->
     <nav class="booked-footer__links" aria-label="Legal">
       <router-link to="/politicas-privacidad" class="booked-footer__link">
         Política de Privacidad
@@ -17,10 +12,8 @@
         Aviso Legal
       </router-link>
     </nav>
-
-    <!-- Información de Copyright -->
     <p class="booked-footer__copy">
-      © {{ new Date().getFullYear() }} NEGOCIOS DEL PACIFICO. 
+      © {{ new Date().getFullYear() }} Aluvicopp.
       <br class="mobile-break" />
       Todos los derechos reservados.
     </p>
@@ -35,13 +28,11 @@
   width: 100%;
   padding: 2.5rem 1.5rem 3.5rem;
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid #F0F4FB;
+  background: #FAFBFF;
   margin-top: auto;
 
-  @media (min-width: 768px) {
-    padding: 4rem 2rem;
-  }
+  @media (min-width: 768px) { padding: 4rem 2rem; }
 
   &__links {
     display: flex;
@@ -49,56 +40,34 @@
     justify-content: center;
     gap: 0.85rem;
     margin-bottom: 1.25rem;
-
-    @media (min-width: 768px) {
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
+    @media (min-width: 768px) { gap: 1.5rem; margin-bottom: 1.5rem; }
   }
 
   &__link {
     @include fonts.interface-font(500);
     font-size: 0.72rem;
-    color: rgba(colors.$white, 0.35);
+    color: #B0C0D5;
     text-decoration: none;
-    transition: all 0.3s ease;
-    letter-spacing: 0.4px;
-
-    &:hover {
-      color: colors.$white;
-      text-shadow: 0 0 12px rgba(colors.$white, 0.4);
-    }
-
-    @media (min-width: 768px) {
-      font-size: 0.85rem;
-    }
+    transition: color 0.3s ease;
+    &:hover { color: colors.$OS-NAVY; }
+    @media (min-width: 768px) { font-size: 0.85rem; }
   }
 
-  &__separator {
-    color: rgba(255, 255, 255, 0.1);
-    font-size: 1rem;
-    line-height: 1;
-  }
+  &__separator { color: #D0DBE8; font-size: 1rem; line-height: 1; }
 
   &__copy {
     @include fonts.interface-font(500);
     font-size: 0.65rem;
-    color: rgba(colors.$white, 0.18);
+    color: #C8D8ED;
     margin: 0;
     line-height: 1.8;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-
-    @media (min-width: 768px) {
-      font-size: 0.72rem;
-      letter-spacing: 2.2px;
-    }
+    @media (min-width: 768px) { font-size: 0.72rem; letter-spacing: 2.2px; }
   }
 }
 
 .mobile-break {
-  @media (min-width: 640px) {
-    display: none;
-  }
+  @media (min-width: 640px) { display: none; }
 }
 </style>

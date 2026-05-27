@@ -3,14 +3,9 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import CalendarModal from '@/components/CalendarModal.vue'
 import { trackStage, generateEventId } from '@/utils/ghl'
 import { useContactStore } from '@/stores/contact'
-import alePhoto from '@/assets/team/ale-barreto.png'
 
 const contactStore = useContactStore()
-
-// ── Calendar modal ────────────────────────────────────────────────────────────
 const calendarOpen = ref(false)
-
-// ── Contact capture guard ─────────────────────────────────────────────────────
 const captureOpen = ref(false)
 const captureForm = ref({ nombre: '', apellido: '', empresa: '', email: '', telefono: '' })
 const captureErrors = ref<Record<string, string>>({})
@@ -58,7 +53,6 @@ const submitCapture = async () => {
   startTimer()
 }
 
-// ── 2-minute countdown (3s en localhost para testing) ────────────────────────
 const IS_DEV = window.location.hostname === 'localhost'
 const COUNTDOWN_SECONDS = IS_DEV ? 3 : 120
 const secondsLeft = ref(COUNTDOWN_SECONDS)
@@ -99,15 +93,12 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
 <template>
   <div class="vv-page">
 
-    <!-- Top bar -->
     <header class="vv-topbar">
-      <h2 class="vv-topbar__logo-text">ALE BARRETO</h2>
+      <h2 class="vv-topbar__logo-text">ALUVICOPP</h2>
     </header>
 
-    <!-- Main content -->
     <main class="vv-main">
 
-      <!-- Progress stepper -->
       <div class="vv-stepper" aria-label="Paso 1 de 2">
         <span class="vv-stepper__pill">
           <span class="vv-stepper__dot vv-stepper__dot--active" aria-current="step"></span>
@@ -116,29 +107,27 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
         </span>
       </div>
 
-      <!-- Headline -->
       <section class="vv-headline">
         <p class="vv-eyebrow">
-          <i class="fa-solid fa-tree" aria-hidden="true"></i>
+          <i class="fa-solid fa-compass-drafting" aria-hidden="true"></i>
           Antes de agendar
         </p>
         <h1 class="vv-h1">
-          Descubre por qué los proyectos de lujo
-          <span class="vv-accent">eligen a Ale Barreto</span>
+          Descubre por qué los proyectos de ingeniería
+          <span class="vv-accent">eligen a Aluvicopp</span>
         </h1>
         <p class="vv-subtitle">
-          Ve el video completo. Ale Barreto te explica cómo transformamos espacios con la nobleza de la madera.
+          Ve el video completo. José te explica cómo la ingeniería estructural de precisión protege tu
+          patrimonio y transforma tus espacios con vidrio templado y aluminio de grado industrial.
         </p>
       </section>
 
-      <!-- Wistia video embed -->
       <div class="vv-video-wrapper">
         <div class="vv-video-ratio">
-          <wistia-player media-id="5ql8l131me" aspect="1.7777777777777777"></wistia-player>
+          <wistia-player media-id="u9yljeo589" aspect="1.7777777777777777"></wistia-player>
         </div>
       </div>
 
-      <!-- CTA section -->
       <div class="vv-cta-section">
         <div v-if="!ctaUnlocked" class="vv-cta-locked" aria-live="polite">
           <i class="fa-solid fa-clock vv-cta-locked__icon" aria-hidden="true"></i>
@@ -159,7 +148,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
           @click="calendarOpen = true"
         >
           <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
-          AGENDAR MI ASESORÍA DE DISEÑO
+          AGENDAR MI DIAGNÓSTICO ESTRUCTURAL
         </button>
 
         <p class="vv-cta-sub">
@@ -168,27 +157,27 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
         </p>
       </div>
 
-      <!-- Authority section -->
       <section class="vv-authority" aria-labelledby="authority-heading">
         <div class="vv-authority__inner">
           <div class="vv-authority__photo-wrap">
             <div class="vv-authority__avatar" aria-hidden="true">
-              <img :src="alePhoto" alt="Ale Barreto" class="vv-authority__img" />
+              <i class="fa-solid fa-hard-hat"></i>
             </div>
           </div>
           <div class="vv-authority__content">
-            <p class="vv-authority__eyebrow">Tu especialista asignada</p>
-            <h2 id="authority-heading" class="vv-authority__name">Ale Barreto</h2>
-            <p class="vv-authority__role">Experta en Diseño y Construcción en Madera</p>
+            <p class="vv-authority__eyebrow">Fundador y Director Técnico</p>
+            <h2 id="authority-heading" class="vv-authority__name">José</h2>
+            <p class="vv-authority__role">Especialista en Soluciones Estructurales de Vidrio y Aluminio</p>
             <p class="vv-authority__bio">
-              Con años de experiencia en el mercado ecuatoriano, me especializo en crear
-              espacios que combinan la nobleza de la madera con diseños modernos y funcionales.
-              Mi objetivo es que cada proyecto sea una inversión que dure toda la vida.
+              Con más de 15 años de experiencia en ingeniería estructural, me he dedicado a
+              transformar espacios corporativos y residenciales con soluciones de vidrio templado
+              y aluminio de precisión. Mi compromiso es que cada proyecto sea una inversión
+              que dure toda la vida.
             </p>
             <ul class="vv-authority__creds" role="list">
-              <li><i class="fa-solid fa-check-circle" aria-hidden="true"></i> Especialista en maderas nobles y tratadas</li>
-              <li><i class="fa-solid fa-check-circle" aria-hidden="true"></i> Diseños exclusivos a medida</li>
-              <li><i class="fa-solid fa-check-circle" aria-hidden="true"></i> Gestión integral: del plano a la instalación</li>
+              <li><i class="fa-solid fa-check-circle" aria-hidden="true"></i> Especialista en cálculo estructural de vidrio templado</li>
+              <li><i class="fa-solid fa-check-circle" aria-hidden="true"></i> Certificación en perfilería de aluminio de alta resistencia</li>
+              <li><i class="fa-solid fa-check-circle" aria-hidden="true"></i> Gestión integral: del diseño estructural a la instalación</li>
             </ul>
           </div>
         </div>
@@ -196,31 +185,28 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
 
     </main>
 
-    <!-- Footer -->
     <footer class="vv-footer">
       <nav class="vv-footer__links" aria-label="Legal">
         <RouterLink to="/politicas-privacidad">Política de Privacidad</RouterLink>
         <RouterLink to="/aviso-legal">Aviso Legal</RouterLink>
       </nav>
-      <p class="vv-footer__copy">© {{ new Date().getFullYear() }} ALE BARRETO. Todos los derechos reservados.</p>
+      <p class="vv-footer__copy">© {{ new Date().getFullYear() }} Aluvicopp. Todos los derechos reservados.</p>
     </footer>
 
   </div>
 
-  <!-- Calendar modal -->
   <CalendarModal :open="calendarOpen" @close="calendarOpen = false" />
 
-  <!-- Contact capture overlay -->
   <Teleport to="body">
     <Transition name="capture-fade">
       <div v-if="captureOpen" class="capture-overlay" role="dialog" aria-modal="true" aria-labelledby="capture-title">
         <div class="capture-modal">
           <div class="capture-modal__header">
-            <h2 class="capture-modal__logo-text">ALE BARRETO</h2>
+            <h2 class="capture-modal__logo-text">ALUVICOPP</h2>
             <h2 id="capture-title" class="capture-modal__title">
               Antes de ver el video, <span>confirma tus datos</span>
             </h2>
-            <p class="capture-modal__sub">Para personalizar tu asesoría de diseño</p>
+            <p class="capture-modal__sub">Para personalizar tu diagnóstico estructural</p>
           </div>
           <form class="capture-modal__form" @submit.prevent="submitCapture" novalidate>
             <div class="capture-row">
@@ -237,7 +223,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
             </div>
             <div class="capture-field" :class="{ error: captureTouched.empresa && captureErrors.empresa }">
               <label>Tu proyecto</label>
-              <input v-model="captureForm.empresa" type="text" placeholder="Ej: Remodelación Sala" @blur="captureTouched.empresa = true" />
+              <input v-model="captureForm.empresa" type="text" placeholder="Ej: Fachada Corporativa" @blur="captureTouched.empresa = true" />
               <span v-if="captureTouched.empresa && captureErrors.empresa" class="capture-field__error">{{ captureErrors.empresa }}</span>
             </div>
             <div class="capture-field" :class="{ error: captureTouched.email && captureErrors.email }">
@@ -329,7 +315,6 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
     border-radius: 50%;
     background: #D0DBE8;
     transition: background 0.2s;
-
     &--active { background: colors.$OS-NAVY; }
   }
 
@@ -393,7 +378,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
     height: 100%;
 
     &:not(:defined) {
-      background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/5ql8l131me/swatch');
+      background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/u9yljeo589/swatch');
       display: block;
       filter: blur(5px);
       padding-top: 56.25%;
@@ -401,7 +386,6 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   }
 }
 
-// ── CTA section ──────────────────────────────────────────────────────────────
 .vv-cta-section {
   display: flex;
   flex-direction: column;
@@ -461,7 +445,6 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   max-width: 420px;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   box-shadow: 0 4px 20px rgba(204, 0, 0, 0.35);
-
   &:hover { background: #AA0000; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(204, 0, 0, 0.45); }
   &:active { transform: translateY(0); }
 }
@@ -476,7 +459,6 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   i { font-size: 0.7rem; }
 }
 
-// ── Authority ────────────────────────────────────────────────────────────────
 .vv-authority {
   margin-top: 3.5rem;
   padding: 2rem;
@@ -500,12 +482,10 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   box-shadow: 0 4px 16px rgba(0, 63, 125, 0.15);
   overflow: hidden;
   background: colors.$OS-NAVY;
-}
-
-.vv-authority__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  i { color: rgba(#ffffff, 0.7); font-size: 2.5rem; }
 }
 
 .vv-authority__eyebrow {
@@ -557,7 +537,6 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   }
 }
 
-// ── Footer ───────────────────────────────────────────────────────────────────
 .vv-footer {
   padding: 1.5rem;
   border-top: 1px solid #F0F4FB;
@@ -569,22 +548,12 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   &__links {
     display: flex;
     gap: 1.5rem;
-    a {
-      font-size: 0.76rem;
-      color: #B0C0D5;
-      text-decoration: none;
-      &:hover { color: colors.$OS-NAVY; }
-    }
+    a { font-size: 0.76rem; color: #B0C0D5; text-decoration: none; &:hover { color: colors.$OS-NAVY; } }
   }
 
-  &__copy {
-    font-size: 0.72rem;
-    color: #C8D8ED;
-    margin: 0;
-  }
+  &__copy { font-size: 0.72rem; color: #C8D8ED; margin: 0; }
 }
 
-// ── Capture overlay ──────────────────────────────────────────────────────────
 .capture-fade-enter-active,
 .capture-fade-leave-active { transition: opacity 0.25s ease; }
 .capture-fade-enter-from,
@@ -685,10 +654,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
 
   &.error input { border-color: colors.$OS-RED; }
 
-  &__error {
-    font-size: 0.73rem;
-    color: colors.$OS-RED;
-  }
+  &__error { font-size: 0.73rem; color: colors.$OS-RED; }
 }
 
 .capture-submit {
@@ -710,7 +676,6 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
   margin-top: 0.25rem;
   transition: background 0.2s, transform 0.15s;
   box-shadow: 0 4px 16px rgba(204, 0, 0, 0.3);
-
   &:hover:not(:disabled) { background: #AA0000; transform: translateY(-1px); }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }

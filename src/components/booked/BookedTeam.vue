@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * BookedTeam.vue
- * Displays the team members who will assist the client.
- * Provides social proof and builds personal connection.
- */
-
 interface TeamMember {
   name: string;
   role: string;
@@ -22,25 +16,17 @@ const props = defineProps({
 <template>
   <section class="booked-team">
     <h2 class="booked-team__section-title">
-      <i class="fa-solid fa-users"></i>
-      Conoce a tus expertos
+      <i class="fa-solid fa-hard-hat"></i>
+      Tu especialista
     </h2>
 
     <div class="team-grid">
-      <article
-        v-for="member in props.team"
-        :key="member.name"
-        class="team-card"
-      >
-        <!-- Foto de perfil con decoraciones -->
+      <article v-for="member in props.team" :key="member.name" class="team-card">
         <div class="team-card__image-wrap">
-          <img :src="member.photo" :alt="member.name" class="team-card__photo" />
-          <div class="team-card__verified-badge">
-            <i class="fa-solid fa-shield-check"></i>
+          <div class="team-card__avatar">
+            <i class="fa-solid fa-user-tie"></i>
           </div>
         </div>
-
-        <!-- Información del miembro -->
         <div class="team-card__info">
           <h3 class="team-card__name">{{ member.name }}</h3>
           <p class="team-card__role">{{ member.role }}</p>
@@ -56,27 +42,19 @@ const props = defineProps({
 
 .booked-team {
   width: 100%;
-  padding: 0 0 2.5rem; // Padding horizontal removido
-
-  @media (min-width: 768px) {
-    padding: 0 0 4rem;
-  }
+  padding: 0 0 2.5rem;
+  @media (min-width: 768px) { padding: 0 0 4rem; }
 
   &__section-title {
     @include fonts.heading-font(700);
     font-size: 1.15rem;
-    color: colors.$white;
+    color: colors.$OS-DARK;
     margin: 0 0 1.5rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-
-    i { color: colors.$BAKANO-PINK; }
-
-    @media (min-width: 768px) {
-      font-size: 1.35rem;
-      margin-bottom: 2.5rem;
-    }
+    i { color: colors.$OS-NAVY; }
+    @media (min-width: 768px) { font-size: 1.35rem; margin-bottom: 2.5rem; }
   }
 }
 
@@ -84,11 +62,7 @@ const props = defineProps({
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
-
-  @media (min-width: 600px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.75rem;
-  }
+  @media (min-width: 600px) { grid-template-columns: repeat(2, 1fr); gap: 1.75rem; }
 }
 
 .team-card {
@@ -96,98 +70,43 @@ const props = defineProps({
   align-items: center;
   gap: 1.25rem;
   padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #F5F8FF;
+  border: 1px solid rgba(colors.$OS-NAVY, 0.1);
   border-radius: 28px;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top right, rgba(colors.$BAKANO-PINK, 0.1), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
+  transition: all 0.3s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(colors.$BAKANO-PINK, 0.3);
-    transform: translateY(-8px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-
-    &::before { opacity: 1; }
-
-    .team-card__image-wrap {
-      transform: scale(1.08) rotate(-3deg);
-      border-color: colors.$BAKANO-PINK;
-    }
-
-    .team-card__verified-badge {
-      transform: scale(1.2) rotate(15deg);
-      background: colors.$BAKANO-PINK;
-      color: colors.$white;
-    }
+    background: #EEF4FF;
+    border-color: rgba(colors.$OS-BLUE, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
   }
 
-  @media (min-width: 768px) {
-    flex-direction: column;
-    text-align: center;
-    padding: 2.5rem 1.5rem;
-    gap: 1.75rem;
-  }
+  @media (min-width: 768px) { flex-direction: column; text-align: center; padding: 2.5rem 1.5rem; gap: 1.75rem; }
 
   &__image-wrap {
     position: relative;
-    width: 68px;
-    height: 68px;
+    width: 68px; height: 68px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(colors.$OS-NAVY, 0.2);
     padding: 4px;
-    transition: all 0.5s ease;
+    transition: all 0.3s ease;
     flex-shrink: 0;
-    background: #0a0712;
+    background: #ffffff;
 
-    @media (min-width: 768px) {
-      width: 110px;
-      height: 110px;
-      border-width: 3px;
-    }
+    @media (min-width: 768px) { width: 110px; height: 110px; }
   }
 
-  &__photo {
+  &__avatar {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    object-fit: cover;
-    filter: saturate(1.1);
-  }
-
-  &__verified-badge {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 22px;
-    height: 22px;
-    background: rgba(colors.$BAKANO-PURPLE, 0.9);
-    border-radius: 50%;
+    background: colors.$OS-NAVY;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
-    color: colors.$white;
-    border: 2px solid #0a0712;
-    transition: all 0.4s ease;
-
-    @media (min-width: 768px) {
-      width: 30px;
-      height: 30px;
-      font-size: 0.9rem;
-      bottom: 4px;
-      right: 4px;
-    }
+    i { color: rgba(#ffffff, 0.85); font-size: 1.8rem; }
+    @media (min-width: 768px) { i { font-size: 2.5rem; } }
   }
 
   &__info {
@@ -201,26 +120,20 @@ const props = defineProps({
   &__name {
     @include fonts.heading-font(700);
     font-size: 1.1rem;
-    color: colors.$white;
+    color: colors.$OS-DARK;
     margin: 0;
     letter-spacing: -0.01em;
-
-    @media (min-width: 768px) {
-      font-size: 1.35rem;
-    }
+    @media (min-width: 768px) { font-size: 1.35rem; }
   }
 
   &__role {
     @include fonts.interface-font(600);
     font-size: 0.75rem;
-    color: rgba(colors.$white, 0.5);
+    color: #8A9BB5;
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-
-    @media (min-width: 768px) {
-      font-size: 0.85rem;
-    }
+    @media (min-width: 768px) { font-size: 0.85rem; }
   }
 }
 </style>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 
-// ── Contact name from localStorage ───────────────────────────────────────────
 const contactName = computed(() => {
   try {
     const stored = localStorage.getItem('os_contact')
@@ -10,7 +9,6 @@ const contactName = computed(() => {
   } catch { return '' }
 })
 
-// ── ¿Visitante que regresa? (booking > 10 min) ───────────────────────────────
 const RETURNING_THRESHOLD_MS = 10 * 60 * 1000
 const isReturningVisitor = computed(() => {
   const ts = Number(localStorage.getItem('os_booked_at') ?? 0)
@@ -18,12 +16,11 @@ const isReturningVisitor = computed(() => {
   return Date.now() - ts > RETURNING_THRESHOLD_MS
 })
 
-// ── Fire fbq CompleteRegistration once ───────────────────────────────────────
 onMounted(() => {
   const alreadyFired = sessionStorage.getItem('os_complete_fired')
   if (!alreadyFired) {
     ;(window as any).fbq?.('track', 'CompleteRegistration', {
-      content_name: 'consulta-agendada',
+      content_name: 'diagnostico-agendado',
     })
     sessionStorage.setItem('os_complete_fired', '1')
   }
@@ -33,17 +30,17 @@ const nextSteps = [
   {
     icon: 'fa-solid fa-envelope',
     title: 'Revisa tu email',
-    body: 'Te enviamos la confirmación con todos los detalles de tu asesoría de diseño.',
+    body: 'Te enviamos la confirmación con todos los detalles de tu sesión de diagnóstico estructural.',
   },
   {
     icon: 'fa-brands fa-whatsapp',
     title: 'Te contactamos por WhatsApp',
-    body: 'Ale Barreto te escribirá para confirmar la cita y conocer un poco más sobre tu idea.',
+    body: 'José te escribirá para confirmar la cita y conocer los detalles técnicos de tu proyecto.',
   },
   {
-    icon: 'fa-solid fa-tree',
-    title: 'Prepara tu inspiración',
-    body: 'Ten a mano referencias o ideas de lo que te gustaría lograr en tu espacio.',
+    icon: 'fa-solid fa-building',
+    title: 'Prepara tus planos',
+    body: 'Si tienes planos o medidas del espacio, tenlos a mano para aprovechar al máximo la sesión.',
   },
 ]
 </script>
@@ -51,20 +48,17 @@ const nextSteps = [
 <template>
   <div class="booked">
 
-    <!-- TOP BAR -->
     <header class="booked__topbar">
-      <h2 class="booked__logo-text">ALE BARRETO</h2>
+      <h2 class="booked__logo-text">ALUVICOPP</h2>
     </header>
 
     <main class="booked__main">
 
-      <!-- Success hero -->
       <section class="booked__hero">
         <div class="booked__hero-icon" aria-hidden="true">
           <i class="fa-solid fa-circle-check"></i>
         </div>
 
-        <!-- Visitante que regresa: ya tiene cita -->
         <template v-if="isReturningVisitor">
           <p class="booked__hero-eyebrow">
             <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
@@ -72,36 +66,34 @@ const nextSteps = [
           </p>
           <h1 class="booked__hero-title">
             <template v-if="contactName">
-              {{ contactName }}, ya tenemos tu cita reservada
+              {{ contactName }}, ya tenemos tu diagnóstico agendado
             </template>
             <template v-else>
-              Ya tenemos tu cita reservada
+              Ya tenemos tu diagnóstico agendado
             </template>
           </h1>
           <p class="booked__hero-subtitle">
-            Tu asesoría de diseño con Ale Barreto está confirmada. Revisa tu correo o
-            WhatsApp para todos los detalles. Si necesitas reagendar, escríbenos por WhatsApp.
+            Tu sesión de diagnóstico estructural con Aluvicopp está confirmada. Revisa tu correo o
+            WhatsApp para todos los detalles. Si necesitas reagendar, escríbenos.
           </p>
         </template>
 
-        <!-- Recién agendado -->
         <template v-else>
           <h1 class="booked__hero-title">
             <template v-if="contactName">
               ¡Listo, {{ contactName }}!
             </template>
             <template v-else>
-              ¡Tu consulta está confirmada!
+              ¡Tu diagnóstico está confirmado!
             </template>
           </h1>
           <p class="booked__hero-subtitle">
-            Tu asesoría de diseño con Ale Barreto ha sido agendada correctamente.
+            Tu sesión de diagnóstico estructural con Aluvicopp ha sido agendada correctamente.
             En breve recibirás todos los detalles.
           </p>
         </template>
       </section>
 
-      <!-- What to expect -->
       <section class="booked__steps" aria-labelledby="steps-heading">
         <p id="steps-heading" class="booked__steps-label">Próximos pasos</p>
         <div class="booked__steps-grid">
@@ -116,27 +108,27 @@ const nextSteps = [
         </div>
       </section>
 
-      <!-- Team card — Ale Barreto -->
       <section class="booked__team" aria-labelledby="team-heading">
         <p id="team-heading" class="booked__team-label">Tu especialista</p>
         <div class="booked__team-card">
           <div class="booked__team-avatar" aria-hidden="true">
-            <i class="fa-solid fa-user-tie"></i>
+            <i class="fa-solid fa-hard-hat"></i>
           </div>
           <div class="booked__team-info">
-            <strong class="booked__team-name">Ale Barreto</strong>
-            <span class="booked__team-role">Experta en Diseño y Construcción en Madera</span>
+            <strong class="booked__team-name">José</strong>
+            <span class="booked__team-role">Fundador — Especialista en Soluciones Estructurales</span>
             <p class="booked__team-note">
-              "La madera no es solo un material — es el alma de un espacio que cuenta una historia."
+              "Cada estructura que diseñamos es el reflejo de nuestro compromiso con la precisión, la seguridad y la estética que tu patrimonio merece."
             </p>
           </div>
         </div>
       </section>
 
-      <!-- Disclaimer -->
       <p class="booked__disclaimer">
         <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-        Los resultados mencionados en el video corresponden a casos reales. Cada proyecto de diseño y construcción es único y los resultados dependen de las especificaciones y materiales seleccionados.
+        Los resultados mencionados en el video corresponden a casos reales. Cada proyecto de ingeniería
+        estructural es único y los resultados dependen de las especificaciones técnicas, materiales
+        seleccionados y condiciones del espacio.
       </p>
 
     </main>
@@ -146,7 +138,7 @@ const nextSteps = [
         <RouterLink to="/politicas-privacidad">Política de Privacidad</RouterLink>
         <RouterLink to="/aviso-legal">Aviso Legal</RouterLink>
       </nav>
-      <p class="booked__footer-copy">© {{ new Date().getFullYear() }} ALE BARRETO. Todos los derechos reservados.</p>
+      <p class="booked__footer-copy">© {{ new Date().getFullYear() }} Aluvicopp. Todos los derechos reservados.</p>
     </footer>
 
   </div>
@@ -176,7 +168,14 @@ const nextSteps = [
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
 }
 
-.booked__logo { height: 36px; width: auto; object-fit: contain; }
+.booked__logo-text {
+  font-family: fonts.$font-principal;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  color: colors.$OS-NAVY;
+  margin: 0;
+}
 
 .booked__main {
   flex: 1;
@@ -189,7 +188,6 @@ const nextSteps = [
   gap: 2.5rem;
 }
 
-// ── Hero ─────────────────────────────────────────────────────────────────────
 .booked__hero {
   text-align: center;
   padding: 2rem;
@@ -198,29 +196,15 @@ const nextSteps = [
   border-radius: 20px;
 }
 
-.booked__hero-icon {
-  font-size: 3.5rem;
-  color: colors.$OS-BLUE;
-  margin-bottom: 1rem;
-  line-height: 1;
-}
+.booked__hero-icon { font-size: 3.5rem; color: colors.$OS-BLUE; margin-bottom: 1rem; line-height: 1; }
 
 .booked__hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(colors.$AB-SAGE, 0.14);
-  color: colors.$AB-SAGE;
-  border: 1px solid rgba(colors.$AB-SAGE, 0.3);
-  border-radius: 999px;
-  padding: 0.4rem 0.95rem;
-  margin: 0 0 0.85rem;
-  font-family: fonts.$font-interface;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(colors.$OS-BLUE, 0.14); color: colors.$OS-BLUE;
+  border: 1px solid rgba(colors.$OS-BLUE, 0.3); border-radius: 999px;
+  padding: 0.4rem 0.95rem; margin: 0 0 0.85rem;
+  font-family: fonts.$font-interface; font-size: 0.74rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
   i { font-size: 0.78rem; }
 }
 
@@ -240,7 +224,6 @@ const nextSteps = [
   max-width: 460px;
 }
 
-// ── Steps ────────────────────────────────────────────────────────────────────
 .booked__steps-label,
 .booked__team-label {
   font-family: fonts.$font-interface;
@@ -305,7 +288,6 @@ const nextSteps = [
   margin: 0;
 }
 
-// ── Team ─────────────────────────────────────────────────────────────────────
 .booked__team-card {
   display: flex;
   gap: 1.25rem;
@@ -357,7 +339,6 @@ const nextSteps = [
   line-height: 1.55;
 }
 
-// ── Disclaimer ───────────────────────────────────────────────────────────────
 .booked__disclaimer {
   display: flex;
   gap: 0.6rem;
@@ -369,7 +350,6 @@ const nextSteps = [
   i { font-size: 0.8rem; flex-shrink: 0; margin-top: 1px; color: #C0D0E0; }
 }
 
-// ── Footer ───────────────────────────────────────────────────────────────────
 .booked__footer {
   padding: 1.5rem;
   border-top: 1px solid #F0F4FB;
@@ -379,11 +359,7 @@ const nextSteps = [
   gap: 0.5rem;
   text-align: center;
 
-  &-links {
-    display: flex;
-    gap: 1.5rem;
-    a { font-size: 0.76rem; color: #B0C0D5; text-decoration: none; &:hover { color: colors.$OS-NAVY; } }
-  }
+  &-links { display: flex; gap: 1.5rem; a { font-size: 0.76rem; color: #B0C0D5; text-decoration: none; &:hover { color: colors.$OS-NAVY; } } }
   &-copy { font-size: 0.72rem; color: #C8D8ED; margin: 0; }
 }
 </style>

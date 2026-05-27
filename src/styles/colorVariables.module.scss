@@ -1,33 +1,44 @@
-// Ale Barreto — Expert in Wood
-$BAKANO-PINK:   #D4A373;   // Wood Pastel (Primary)
-$BAKANO-DARK:   #283618;   // Dark Forest/Earth (Text)
-$BAKANO-LIGHT:  #FEFAE0;   // Cream/Soft Pastel (Backgrounds)
-$BAKANO-PURPLE: #BC6C25;   // Earthy Brown (Secondary)
-$BAKANO-GREEN:  #606C38;   // Sage Green (Accent)
+// Aluvicopp — Ingeniería Estructural en Vidrio y Aluminio
+$ALU-NAVY:    #0F1B2D;   // Deep Navy — Brand Principal
+$ALU-BLUE:    #1A5C8A;   // Steel Blue — Secundario
+$ALU-SILVER:  #8E9CB2;   // Silver/Aluminum — Acento metálico
+$ALU-RED:     #CC0000;   // Bold Red — CTAs y urgencia
+$ALU-DARK:    #0A1628;   // Texto oscuro
+$ALU-LIGHT:   #F4F7FC;   // Fondo claro (ice/glass)
+$ALU-SURFACE: #F8FAFE;   // Superficies/cards
 
-// Aliases semánticos
-$AB-WOOD:    #D4A373;
-$AB-EARTH:   #BC6C25;
-$AB-FOREST:  #283618;
-$AB-SAGE:    #606C38;
-$AB-CREAM:   #FEFAE0;
-$AB-WHITE:   #ffffff;
+// Urgency / inmediatez
+$ALU-URGENT:        #CC0000;
+$ALU-URGENT-DARK:   #AA0000;
+$ALU-URGENT-LIGHT:  #FF6B6B;
+$ALU-URGENT-BG:     #FFF5F5;
 
-// Urgency / inmediatez (no es del brand pastel — alerta accionable)
-$AB-URGENT:        #B91C1C;
-$AB-URGENT-DARK:   #991B1B;
-$AB-URGENT-LIGHT:  #FCA5A5;
-$AB-URGENT-BG:     #FEF2F2;
+// Aliases legacy Bakano (mantienen compatibilidad — no usar para código nuevo)
+$BAKANO-PINK:   $ALU-NAVY;
+$BAKANO-DARK:   $ALU-DARK;
+$BAKANO-LIGHT:  $ALU-LIGHT;
+$BAKANO-PURPLE: $ALU-BLUE;
+$BAKANO-GREEN:  $ALU-SILVER;
+$BAKANO-PRIMARY: $ALU-NAVY;
 
-// Color primario
-$BAKANO-PRIMARY: $BAKANO-PINK;
+// Aliases legacy Ale Barreto (mantienen compatibilidad)
+$AB-WOOD:     $ALU-SILVER;
+$AB-EARTH:    $ALU-BLUE;
+$AB-FOREST:   $ALU-NAVY;
+$AB-SAGE:     $ALU-SILVER;
+$AB-CREAM:    $ALU-LIGHT;
+$AB-WHITE:    #ffffff;
+$AB-URGENT:        $ALU-URGENT;
+$AB-URGENT-DARK:   $ALU-URGENT-DARK;
+$AB-URGENT-LIGHT:  $ALU-URGENT-LIGHT;
+$AB-URGENT-BG:     $ALU-URGENT-BG;
 
 // Colores base
 $white: #ffffff;
 $text-light: #f5f5f5;
-$overlay-wood: rgba($BAKANO-PINK, 0.1);
+$overlay-wood: rgba($ALU-NAVY, 0.1);
 
-// Colores adicionales para UI (Mantenemos la escala de grises para utilidad)
+// Colores adicionales para UI
 $gray-100: #f8f9fa;
 $gray-200: #e9ecef;
 $gray-300: #dee2e6;
@@ -38,8 +49,8 @@ $gray-700: #495057;
 $gray-800: #343a40;
 $gray-900: #212529;
 
-// Legacy Aliases (to prevent build errors)
-$OS-RED:   $BAKANO-PINK;
-$OS-NAVY:  $AB-FOREST;
-$OS-BLUE:  $AB-SAGE;
-$OS-DARK:  $AB-FOREST;
+// OS Aliases (para uso en funnel — mantener)
+$OS-RED:   $ALU-RED;
+$OS-NAVY:  $ALU-NAVY;
+$OS-BLUE:  $ALU-BLUE;
+$OS-DARK:  $ALU-DARK;
