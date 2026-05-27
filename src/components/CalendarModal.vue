@@ -33,7 +33,7 @@ const isValid = () =>
   form.value.consent
 
 const qualifies = () => {
-  if (form.value.presupuesto === 'menos3000') return false
+  if (form.value.presupuesto === 'menos1200') return false
   return true
 }
 
@@ -60,7 +60,8 @@ const handleSubmit = async () => {
     ejecutar: 'Ejecutar la obra completa',
   }
   const presupuestoLabel: Record<string, string> = {
-    menos3000: 'Menos de $3,000 USD',
+    menos1200: 'Menos de $1,200 USD',
+    mas1200: '$1,200–$3,000 USD',
     mas3000: '$3,000–$8,000 USD',
     mas8000: '$8,000–$15,000 USD',
     mas15000: 'Más de $15,000 USD',
@@ -91,6 +92,10 @@ ALUVICOPP — Cualificación Técnica
 ${califica ? '✅ CALIFICA — Ingeniería completa' : '❌ NO CALIFICA — Presupuesto insuficiente'}
   `.trim()
 
+  const pageEntry = Number(sessionStorage.getItem('alu_page_entry')) || Date.now()
+  const pageDuration = Math.floor((Date.now() - pageEntry) / 1000)
+  const notasConTiempo = `${notas}\n⏳ Tiempo total en página: ${Math.floor(pageDuration / 60)}m ${pageDuration % 60}s`
+
   const payload = {
     nombre: contact.nombre,
     apellido: contact.apellido,
@@ -102,9 +107,10 @@ ${califica ? '✅ CALIFICA — Ingeniería completa' : '❌ NO CALIFICA — Pres
     reto: form.value.reto,
     califica: String(califica),
     etiquetas: etiquetas.join(','),
-    notas,
-    nota: notas,
+    notas: notasConTiempo,
+    nota: notasConTiempo,
     tags: etiquetas.join(','),
+    pageDuration,
     event_id: scheduleEventId,
     ...getStoredFbParams(),
   }
@@ -216,24 +222,32 @@ watch(() => props.open, (v) => {
             </fieldset>
 
             <!-- Q3 — Presupuesto -->
-            <fieldset class="cal-fieldset" :class="{ 'has-error': touched && !form.presupuesto }">
-              <legend class="cal-legend">
-                <span class="cal-q-num">03</span>
-                ¿Cuál es tu rango de inversión estimado?
+            <fieldset class="cal-fieldset cal-fieldset--budget" :class="{ 'has-error': touched && !form.presupuesto, 'has-investment': form.presupuesto && form.presupuesto !== 'menos1200' }">
+              <legend class="cal-legend cal-legend--budget">
+                <span class="cal-q-num cal-q-num--budget">03</span>
+                <span>¿Cuál es tu rango de inversión estimado?</span>
+                <i class="fa-solid fa-chart-line cal-legend-chart" aria-hidden="true"></i>
               </legend>
               <div class="cal-options">
-                <label v-for="opt in [
-                  { value: 'mas15000', label: 'Más de $15,000 USD' },
-                  { value: 'mas8000', label: '$8,000 – $15,000 USD' },
+                <label v-for="(opt, i) in [
+                  { value: 'mas15000', label: 'Más de $15,000 USD', premium: true },
+                  { value: 'mas8000', label: '$8,000 – $15,000 USD', premium: true },
                   { value: 'mas3000', label: '$3,000 – $8,000 USD' },
-                  { value: 'menos3000', label: 'Menos de $3,000 USD' },
-                ]" :key="opt.value" class="cal-option" :class="{ selected: form.presupuesto === opt.value }">
+                  { value: 'mas1200', label: '$1,200 – $3,000 USD' },
+                  { value: 'menos1200', label: 'Menos de $1,200 USD' },
+                ]" :key="opt.value" class="cal-option" :class="{
+                  selected: form.presupuesto === opt.value,
+                  'cal-option--premium': opt.premium && form.presupuesto === opt.value,
+                  'cal-option--low': opt.value === 'menos1200' && form.presupuesto === 'menos1200',
+                  'cal-option--premium-hover': opt.premium && form.presupuesto !== opt.value,
+                }">
                   <input type="radio" :value="opt.value" v-model="form.presupuesto" hidden />
                   <span class="cal-option__radio" aria-hidden="true" />
+                  <i v-if="opt.premium" class="fa-solid fa-gem cal-option__gem" aria-hidden="true"></i>
                   <span class="cal-option__label">{{ opt.label }}</span>
                 </label>
               </div>
-              <span v-if="touched && !form.presupuesto" class="cal-error">Selecciona una opción</span>
+              <span v-if="touched && !form.presupuesto" class="cal-error">Selecciona un rango de inversión</span>
             </fieldset>
 
             <!-- Q4 — Reto técnico -->
@@ -386,7 +400,22 @@ watch(() => props.open, (v) => {
   border: none;
   padding: 0;
   margin: 0;
+
   &.has-error .cal-options { border-color: colors.$OS-RED; border-radius: 10px; }
+
+  &--budget {
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    padding: 1rem 0.85rem;
+    margin: 0 -0.85rem;
+    transition: all 0.25s ease;
+
+    &.has-investment {
+      border-color: rgba(colors.$OS-BLUE, 0.2);
+      background: rgba(colors.$OS-BLUE, 0.02);
+      box-shadow: 0 0 20px rgba(colors.$OS-BLUE, 0.05);
+    }
+  }
 }
 
 .cal-legend {
@@ -398,6 +427,26 @@ watch(() => props.open, (v) => {
   font-weight: 700;
   color: colors.$OS-DARK;
   margin-bottom: 0.75rem;
+
+  &--budget {
+    gap: 0.4rem;
+  }
+}
+
+.cal-legend-chart {
+  color: colors.$OS-BLUE;
+  font-size: 0.8rem;
+  margin-left: auto;
+  animation: chart-pulse 2s ease-in-out infinite;
+
+  .cal-fieldset--budget.has-investment & {
+    animation: chart-pulse 1s ease-in-out infinite;
+  }
+}
+
+@keyframes chart-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
 }
 
 .cal-q-num {
@@ -412,6 +461,11 @@ watch(() => props.open, (v) => {
   font-size: 0.72rem;
   font-weight: 800;
   flex-shrink: 0;
+
+  &--budget {
+    background: colors.$OS-BLUE;
+    box-shadow: 0 0 12px rgba(colors.$OS-BLUE, 0.3);
+  }
 }
 
 .cal-options {
@@ -531,6 +585,11 @@ watch(() => props.open, (v) => {
     color: #6A7E95;
     line-height: 1.5;
   }
+}
+
+@keyframes gem-shine {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.6; transform: scale(0.9) rotate(10deg); }
 }
 
 .cal-submit {

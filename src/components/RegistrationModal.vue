@@ -45,23 +45,63 @@ const otherList = allCountries
 const countries = [...priorityList, { code: '---', name: '', dial: '', flag: '' }, ...otherList]
 
 // ── Estado del formulario ─────────────────────────────────────────────────────
-const step = ref(1) // 1 = cualificación, 2 = datos de contacto
 const selectedCountry = ref<Country>(priorityList[0])
 const dropdownOpen = ref(false)
 const countrySearch = ref('')
 const submitting = ref(false)
-const disqualified = ref(false)
+
+type Urgency = '' | 'inmediato' | 'proximos' | 'planificando' | 'explorando'
 
 const form = ref({
-  enfoque: '',
-  propiedad: '',
-  urgencia: '',
-  calidad: '',
   nombre: '',
   apellido: '',
   email: '',
   phone: '',
+  empresa: '',
+  urgencia: '' as Urgency,
 })
+
+const URGENCY_LABEL: Record<Exclude<Urgency, ''>, string> = {
+  inmediato: 'Necesito ejecutar de inmediato',
+  proximos: 'En los próximos 1–3 meses',
+  planificando: 'En 3–6 meses',
+  explorando: 'Solo estoy explorando opciones',
+}
+
+const urgencyOpts: { value: Exclude<Urgency, ''>; label: string; sub: string; hot?: boolean }[] = [
+  { value: 'inmediato',   label: 'Necesito ejecutar de inmediato', sub: 'Urgencia alta — contrato este mes', hot: true },
+  { value: 'proximos',    label: 'En los próximos 1–3 meses',      sub: 'Planificación cercana' },
+  { value: 'planificando',label: 'En 3–6 meses',                   sub: 'Sin prisa' },
+  { value: 'explorando',  label: 'Solo estoy explorando',          sub: 'Sin urgencia particular' },
+]
+
+function calcTags(urgency: Urgency): string[] {
+  const base = ['aluvicopp', 'funnel-registro']
+  if (urgency === 'inmediato')    return [...base, 'urgente', 'contrato-inmediato']
+  if (urgency === 'proximos')     return [...base, 'urgencia-media']
+  if (urgency === 'planificando') return [...base, 'planificando']
+  if (urgency === 'explorando')   return [...base, 'no-urgente', 'explorando']
+  return base
+}
+
+function buildNote(f: typeof form.value, country: string, pageDuration: number): string {
+  const mins = Math.floor(pageDuration / 60)
+  const secs = pageDuration % 60
+  return [
+    '━━━━━━━━━━━━━━━━━━━━━━━━',
+    'ALUVICOPP — Registro Inicial',
+    '━━━━━━━━━━━━━━━━━━━━━━━━',
+    `👤 ${f.nombre} ${f.apellido}`,
+    `📧 ${f.email}`,
+    `📱 ${f.phone}`,
+    `🏗 Proyecto: ${f.empresa}`,
+    `⏱ Urgencia: ${f.urgencia ? URGENCY_LABEL[f.urgencia] : '—'}`,
+    `🌎 País: ${country}`,
+    `⏳ Tiempo en página: ${mins}m ${secs}s`,
+    '━━━━━━━━━━━━━━━━━━━━━━━━',
+    '✅ Paso 1 — Registro completado',
+  ].join('\n')
+}
 
 const errors = ref<Record<string, string>>({})
 const touched = ref<Record<string, boolean>>({})
@@ -85,63 +125,30 @@ const parsedPhoneE164 = computed(() => {
   return parsed?.format('E.164') ?? ''
 })
 
-// ── Qualification logic ────────────────────────────────────────────────────────
-const qualifiesEnfoque = computed(() => form.value.enfoque === 'valor')
-const isDisqualified = computed(() => {
-  if (form.value.enfoque === 'economico') return true
-  if (form.value.calidad === 'temporal') return true
-  return false
-})
+// ── Page timer ─────────────────────────────────────────────────────────────────
+const pageDuration = ref(0)
+const pageEntryTime = ref(Date.now())
+let timerInterval: ReturnType<typeof setInterval>
 
-const showDisqualification = ref(false)
-
-const advanceToStep2 = () => {
-  if (!form.value.enfoque) {
-    errors.value.enfoque = 'Selecciona una opción'
-    return
-  }
-  if (form.value.enfoque === 'economico') {
-    disqualified.value = true
-    showDisqualification.value = true
-    return
-  }
-  if (!form.value.propiedad) {
-    errors.value.propiedad = 'Selecciona una opción'
-    return
-  }
-  if (!form.value.urgencia) {
-    errors.value.urgencia = 'Selecciona cuándo planeas iniciar'
-    return
-  }
-  if (!form.value.calidad) {
-    errors.value.calidad = 'Selecciona una opción'
-    return
-  }
-  if (form.value.calidad === 'temporal') {
-    disqualified.value = true
-    showDisqualification.value = true
-    return
-  }
-  step.value = 2
+const startPageTimer = () => {
+  pageEntryTime.value = Number(sessionStorage.getItem('alu_page_entry')) || Date.now()
+  timerInterval = setInterval(() => {
+    pageDuration.value = Math.floor((Date.now() - pageEntryTime.value) / 1000)
+  }, 1000)
 }
 
-const goBackToStep1 = () => {
-  showDisqualification.value = false
-  disqualified.value = false
-  form.value.enfoque = ''
-  form.value.propiedad = ''
-  form.value.urgencia = ''
-  form.value.calidad = ''
-  errors.value = {}
-  step.value = 1
+const getPageDuration = (): number => {
+  return Math.floor((Date.now() - pageEntryTime.value) / 1000)
 }
 
-// ── Validaciones paso 2 ────────────────────────────────────────────────────────
+// ── Validaciones ──────────────────────────────────────────────────────────────
 const validators: Record<string, (v: string) => string | null> = {
   nombre: v => v.trim().length < 2 ? 'Ingresa tu nombre' : null,
   apellido: v => v.trim().length < 2 ? 'Ingresa tu apellido' : null,
   email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : 'Email inválido',
   phone: () => phoneValid.value ? null : 'Número inválido para el país seleccionado',
+  empresa: v => v.trim().length < 2 ? 'Ingresa el nombre de tu proyecto' : null,
+  urgencia: v => !v ? 'Selecciona cuándo necesitas iniciar' : null,
 }
 
 const validate = () => {
@@ -166,7 +173,7 @@ const onPhoneInput = (e: Event) => {
   form.value.phone = raw
 }
 
-// ── Dropdown ---
+// ── Dropdown de país ──────────────────────────────────────────────────────────
 const filteredCountries = computed(() => {
   const q = countrySearch.value.toLowerCase()
   if (!q) return countries
@@ -190,59 +197,13 @@ const handleClickOutside = (e: MouseEvent) => {
 
 // ── Submit ────────────────────────────────────────────────────────────────────
 const handleSubmit = async () => {
-  touched.value = { nombre: true, apellido: true, email: true, phone: true }
+  touched.value = { nombre: true, apellido: true, email: true, phone: true, empresa: true, urgencia: true }
   if (!validate()) return
 
   submitting.value = true
 
   const leadEventId = `lead_${Date.now()}_${Math.random().toString(36).slice(2)}`
-
-  const enfoqueLabel: Record<string, string> = {
-    valor: 'Incrementar valor e imagen',
-    economico: 'Buscar presupuesto más económico',
-  }
-  const propiedadLabel: Record<string, string> = {
-    oficina: 'Oficina / Centro de negocios',
-    clinica: 'Clínica o local comercial',
-    residencia: 'Residencia de alto estándar',
-    otro: 'Otro',
-  }
-  const urgenciaLabel: Record<string, string> = {
-    inmediato: 'Este mes — urgencia alta',
-    '1-3': 'En 1 a 3 meses',
-    '3-6': 'En 3 a 6 meses',
-    explorando: 'Solo explorando opciones',
-  }
-  const calidadLabel: Record<string, string> = {
-    premium: 'Sí, busca calidad e ingeniería de largo plazo',
-    temporal: 'No, busca algo temporal',
-  }
-
-  const tags = [
-    'aluvicopp',
-    'funnel-registro',
-    `enfoque-${form.value.enfoque}`,
-    `propiedad-${form.value.propiedad}`,
-    `urgencia-${form.value.urgencia}`,
-    `calidad-${form.value.calidad}`,
-    form.value.urgencia === 'inmediato' ? 'urgente' : '',
-  ].filter(Boolean)
-
-  const nota = [
-    '━━━━━━━━━━━━━━━━━━━━━━━━',
-    'ALUVICOPP — Registro Inicial',
-    '━━━━━━━━━━━━━━━━━━━━━━━━',
-    `👤 ${form.value.nombre.trim()} ${form.value.apellido.trim()}`,
-    `📧 ${form.value.email.trim().toLowerCase()}`,
-    `📱 ${parsedPhoneE164.value}`,
-    '━━━━━━━━━━━━━━━━━━━━━━━━',
-    `🎯 Enfoque: ${enfoqueLabel[form.value.enfoque] ?? form.value.enfoque}`,
-    `🏗 Propiedad: ${propiedadLabel[form.value.propiedad] ?? form.value.propiedad}`,
-    `⏱ Urgencia: ${urgenciaLabel[form.value.urgencia] ?? form.value.urgencia}`,
-    `🔧 Calidad: ${calidadLabel[form.value.calidad] ?? form.value.calidad}`,
-    '━━━━━━━━━━━━━━━━━━━━━━━━',
-    `✅ CUALIFICADO — Accede al video VSL`,
-  ].join('\n')
+  const pageDur = getPageDuration()
 
   const payload = {
     nombre: form.value.nombre.trim(),
@@ -250,16 +211,13 @@ const handleSubmit = async () => {
     email: form.value.email.trim().toLowerCase(),
     telefono: parsedPhoneE164.value,
     telefonoDisplay: selectedCountry.value.dial + ' ' + formattedPhone.value,
-    enfoque: form.value.enfoque,
-    enfoqueLabel: enfoqueLabel[form.value.enfoque] ?? form.value.enfoque,
-    propiedad: form.value.propiedad,
-    propiedadLabel: propiedadLabel[form.value.propiedad] ?? form.value.propiedad,
+    empresa: form.value.empresa.trim(),
+    pais: selectedCountry.value.name,
     urgencia: form.value.urgencia,
-    urgenciaLabel: urgenciaLabel[form.value.urgencia] ?? form.value.urgencia,
-    calidad: form.value.calidad,
-    calidadLabel: calidadLabel[form.value.calidad] ?? form.value.calidad,
-    tags,
-    nota,
+    urgenciaLabel: form.value.urgencia ? URGENCY_LABEL[form.value.urgencia] : '',
+    tags: calcTags(form.value.urgencia),
+    nota: buildNote(form.value, selectedCountry.value.name, pageDur),
+    pageDuration: pageDur,
     source: 'aluvicopp-web',
     timestamp: new Date().toISOString(),
     event_id: leadEventId,
@@ -275,7 +233,7 @@ const handleSubmit = async () => {
   }).catch(() => {})
 
   ;(window as any).fbq?.('track', 'Lead',
-    { content_name: 'diagnostico-estructural' },
+    { content_name: 'registro-inicial' },
     { eventID: leadEventId }
   )
 
@@ -301,12 +259,7 @@ const onKeydown = (e: KeyboardEvent) => {
 watch(() => props.open, (val) => {
   document.body.style.overflow = val ? 'hidden' : ''
   if (val) {
-    step.value = 1
-    disqualified.value = false
-    showDisqualification.value = false
-    form.value = { enfoque: '', propiedad: '', urgencia: '', calidad: '', nombre: '', apellido: '', email: '', phone: '' }
-    errors.value = {}
-    touched.value = {}
+    startPageTimer()
   }
 })
 
@@ -319,6 +272,7 @@ onUnmounted(() => {
   document.removeEventListener('mousedown', handleClickOutside)
   document.removeEventListener('keydown', onKeydown)
   document.body.style.overflow = ''
+  clearInterval(timerInterval)
 })
 
 watch(dropdownOpen, open => {
@@ -342,274 +296,166 @@ watch(dropdownOpen, open => {
             </svg>
           </button>
 
-          <!-- STEP 1 — Qualification -->
-          <template v-if="step === 1 && !showDisqualification">
-            <div class="rmodal__header">
-              <p class="rmodal__eyebrow">Diagnóstico estructural gratuito</p>
-              <h2 id="rmodal-title" class="rmodal__title">
-                Cuéntanos sobre<br><span class="rmodal__title-accent">tu proyecto</span>
-              </h2>
-              <p class="rmodal__subtitle">4 preguntas rápidas para entender si podemos ayudarte — 45 segundos.</p>
-            </div>
+          <div class="rmodal__header">
+            <p class="rmodal__eyebrow">Diagnóstico estructural gratuito</p>
+            <h2 id="rmodal-title" class="rmodal__title">Agenda tu sesión<br><span class="rmodal__title-accent">sin costo</span></h2>
+            <p class="rmodal__subtitle">Cupos limitados — completa tus datos y accede al video exclusivo.</p>
+          </div>
 
-            <form class="rmodal__form" @submit.prevent="advanceToStep2" novalidate>
+          <form class="rmodal__form" @submit.prevent="handleSubmit" novalidate>
 
-              <!-- Q1 — Enfoque -->
-              <fieldset class="rmodal__fieldset" :class="{ 'has-error': errors.enfoque }">
-                <legend class="rmodal__legend">
-                  <span class="rmodal__q-num">01</span>
-                  ¿Cuál es el enfoque principal de tu proyecto?
-                </legend>
-                <div class="rmodal__options">
-                  <label class="rmodal__option" :class="{ selected: form.enfoque === 'valor', 'rmodal__option--warn': form.enfoque === 'economico' }">
-                    <input type="radio" v-model="form.enfoque" value="valor" hidden @change="errors.enfoque = ''" />
-                    <span class="rmodal__option-radio" aria-hidden="true" />
-                    <span class="rmodal__option-label">Incrementar el valor y la imagen de mi propiedad / negocio</span>
-                  </label>
-                  <label class="rmodal__option" :class="{ selected: form.enfoque === 'economico', 'rmodal__option--danger': form.enfoque === 'economico' }">
-                    <input type="radio" v-model="form.enfoque" value="economico" hidden @change="errors.enfoque = ''" />
-                    <span class="rmodal__option-radio" aria-hidden="true" />
-                    <span class="rmodal__option-label">Buscar el presupuesto más económico del mercado</span>
-                  </label>
-                </div>
-                <span v-if="errors.enfoque" class="rmodal__error">{{ errors.enfoque }}</span>
-              </fieldset>
-
-              <!-- Q2 — Propiedad -->
-              <fieldset class="rmodal__fieldset" :class="{ 'has-error': errors.propiedad }">
-                <legend class="rmodal__legend">
-                  <span class="rmodal__q-num">02</span>
-                  ¿Qué tipo de propiedad vamos a intervenir?
-                </legend>
-                <div class="rmodal__options">
-                  <label v-for="opt in [
-                    { value: 'oficina', label: 'Oficina / Centro de negocios' },
-                    { value: 'clinica', label: 'Clínica o local comercial' },
-                    { value: 'residencia', label: 'Residencia de alto estándar' },
-                    { value: 'otro', label: 'Otro' },
-                  ]" :key="opt.value" class="rmodal__option" :class="{ selected: form.propiedad === opt.value }">
-                    <input type="radio" :value="opt.value" v-model="form.propiedad" hidden @change="errors.propiedad = ''" />
-                    <span class="rmodal__option-radio" aria-hidden="true" />
-                    <span class="rmodal__option-label">{{ opt.label }}</span>
-                  </label>
-                </div>
-                <span v-if="errors.propiedad" class="rmodal__error">{{ errors.propiedad }}</span>
-              </fieldset>
-
-              <!-- Q3 — Urgencia -->
-              <fieldset class="rmodal__fieldset" :class="{ 'has-error': errors.urgencia }">
-                <legend class="rmodal__legend">
-                  <span class="rmodal__q-num">03</span>
-                  ¿Cuándo planeas iniciar la ejecución de la obra?
-                </legend>
-                <div class="rmodal__options">
-                  <label v-for="opt in [
-                    { value: 'inmediato', label: 'Este mes — urgencia alta' },
-                    { value: '1-3', label: 'En los próximos 1 a 3 meses' },
-                    { value: '3-6', label: 'En 3 a 6 meses' },
-                    { value: 'explorando', label: 'Solo estoy explorando opciones' },
-                  ]" :key="opt.value" class="rmodal__option" :class="{ selected: form.urgencia === opt.value }">
-                    <input type="radio" :value="opt.value" v-model="form.urgencia" hidden @change="errors.urgencia = ''" />
-                    <span class="rmodal__option-radio" aria-hidden="true" />
-                    <span class="rmodal__option-label">{{ opt.label }}</span>
-                  </label>
-                </div>
-                <span v-if="errors.urgencia" class="rmodal__error">{{ errors.urgencia }}</span>
-              </fieldset>
-
-              <!-- Q4 — Calidad -->
-              <fieldset class="rmodal__fieldset" :class="{ 'has-error': errors.calidad }">
-                <legend class="rmodal__legend">
-                  <span class="rmodal__q-num">04</span>
-                  ¿Entiendes que Aluvicopp trabaja bajo ingeniería técnica premium con materiales certificados para durar 20 años?
-                </legend>
-                <div class="rmodal__options">
-                  <label class="rmodal__option" :class="{ selected: form.calidad === 'premium' }">
-                    <input type="radio" v-model="form.calidad" value="premium" hidden @change="errors.calidad = ''" />
-                    <span class="rmodal__option-radio" aria-hidden="true" />
-                    <span class="rmodal__option-label">Sí, busco esa calidad e ingeniería de largo plazo</span>
-                  </label>
-                  <label class="rmodal__option" :class="{ selected: form.calidad === 'temporal', 'rmodal__option--danger': form.calidad === 'temporal' }">
-                    <input type="radio" v-model="form.calidad" value="temporal" hidden @change="errors.calidad = ''" />
-                    <span class="rmodal__option-radio" aria-hidden="true" />
-                    <span class="rmodal__option-label">No, busco algo temporal y económico</span>
-                  </label>
-                </div>
-                <span v-if="errors.calidad" class="rmodal__error">{{ errors.calidad }}</span>
-              </fieldset>
-
-              <button type="submit" class="rmodal__submit">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                CONTINUAR
-              </button>
-            </form>
-          </template>
-
-          <!-- DISQUALIFICATION SCREEN -->
-          <template v-if="showDisqualification">
-            <div class="rmodal__disq">
-              <div class="rmodal__disq-icon" aria-hidden="true">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-              </div>
-              <h2 class="rmodal__disq-title">Tu proyecto necesita otro enfoque</h2>
-              <p class="rmodal__disq-text">
-                En Aluvicopp trabajamos exclusivamente con ingeniería estructural de precisión y
-                materiales certificados para durar décadas. Nuestros proyectos están diseñados para
-                clientes que priorizan <strong>calidad, seguridad y plusvalía a largo plazo</strong>
-                sobre el precio inicial.
-              </p>
-              <p class="rmodal__disq-text">
-                Si en el futuro buscas una solución definitiva con respaldo técnico, estaremos aquí para ti.
-              </p>
-              <button class="rmodal__disq-btn" @click="goBackToStep1">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polyline points="19 12 5 12"/><polyline points="12 19 5 12 12 5"/>
-                </svg>
-                Revisar mis respuestas
-              </button>
-              <hr class="rmodal__disq-divider" />
-              <p class="rmodal__disq-legal">
-                Si tu proyecto es de gran escala y crees que tu caso es una excepción,
-                <a href="#" @click.prevent="emit('close')">contáctanos directamente</a>.
-              </p>
-            </div>
-          </template>
-
-          <!-- STEP 2 — Contact Data -->
-          <template v-if="step === 2">
-            <div class="rmodal__header">
-              <p class="rmodal__eyebrow">Paso final</p>
-              <h2 id="rmodal-title" class="rmodal__title">
-                Completa tus datos<br><span class="rmodal__title-accent">para acceder al video</span>
-              </h2>
-              <p class="rmodal__subtitle">Cupos limitados — recibe tu sesión de diagnóstico estructural sin costo.</p>
-            </div>
-
-            <form class="rmodal__form" @submit.prevent="handleSubmit" novalidate>
-
-              <div class="rmodal__row">
-                <div class="rmodal__field" :class="{ 'has-error': touched.nombre && errors.nombre }">
-                  <label for="r-nombre">Nombre</label>
-                  <input
-                    id="r-nombre"
-                    v-model="form.nombre"
-                    type="text"
-                    placeholder="Juan"
-                    autocomplete="given-name"
-                    @blur="onBlur('nombre')"
-                  />
-                  <span v-if="touched.nombre && errors.nombre" class="rmodal__error">{{ errors.nombre }}</span>
-                </div>
-
-                <div class="rmodal__field" :class="{ 'has-error': touched.apellido && errors.apellido }">
-                  <label for="r-apellido">Apellido</label>
-                  <input
-                    id="r-apellido"
-                    v-model="form.apellido"
-                    type="text"
-                    placeholder="Pérez"
-                    autocomplete="family-name"
-                    @blur="onBlur('apellido')"
-                  />
-                  <span v-if="touched.apellido && errors.apellido" class="rmodal__error">{{ errors.apellido }}</span>
-                </div>
-              </div>
-
-              <div class="rmodal__field" :class="{ 'has-error': touched.email && errors.email }">
-                <label for="r-email">Correo electrónico</label>
+            <!-- Nombre + Apellido -->
+            <div class="rmodal__row">
+              <div class="rmodal__field" :class="{ 'has-error': touched.nombre && errors.nombre }">
+                <label for="r-nombre">Nombre</label>
                 <input
-                  id="r-email"
-                  v-model="form.email"
-                  type="email"
-                  placeholder="juan@empresa.com"
-                  autocomplete="email"
-                  @blur="onBlur('email')"
+                  id="r-nombre"
+                  v-model="form.nombre"
+                  type="text"
+                  placeholder="Juan"
+                  autocomplete="given-name"
+                  @blur="onBlur('nombre')"
                 />
-                <span v-if="touched.email && errors.email" class="rmodal__error">{{ errors.email }}</span>
+                <span v-if="touched.nombre && errors.nombre" class="rmodal__error">{{ errors.nombre }}</span>
               </div>
 
-              <div class="rmodal__field" :class="{ 'has-error': touched.phone && errors.phone }">
-                <label>Teléfono</label>
-                <div class="rmodal__phone-wrap">
-                  <button
-                    type="button"
-                    class="rmodal__country-trigger"
-                    :aria-expanded="dropdownOpen"
-                    aria-haspopup="listbox"
-                    @click="dropdownOpen = !dropdownOpen"
-                  >
-                    <span class="rmodal__flag">{{ selectedCountry.flag }}</span>
-                    <span class="rmodal__dial">{{ selectedCountry.dial }}</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="rmodal__chevron" :class="{ open: dropdownOpen }">
-                      <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                  </button>
-
-                  <Transition name="dropdown">
-                    <div v-if="dropdownOpen" class="rmodal__country-dropdown" role="listbox">
-                      <input type="text" class="rmodal__country-search" v-model="countrySearch" placeholder="Buscar país..." aria-label="Buscar país" />
-                      <ul>
-                        <li v-for="c in filteredCountries" :key="c.code" :class="['rmodal__country-item', { separator: c.code === '---', active: c.code === selectedCountry.code }]" role="option" :aria-selected="c.code === selectedCountry.code" @click="selectCountry(c)">
-                          <template v-if="c.code !== '---'">
-                            <span class="rmodal__flag">{{ c.flag }}</span>
-                            <span class="rmodal__country-name">{{ c.name }}</span>
-                            <span class="rmodal__country-dial">{{ c.dial }}</span>
-                          </template>
-                          <template v-else>
-                            <span class="rmodal__sep-line" aria-hidden="true" />
-                          </template>
-                        </li>
-                      </ul>
-                    </div>
-                  </Transition>
-
-                  <input
-                    class="rmodal__phone-input"
-                    type="tel"
-                    :value="form.phone"
-                    placeholder="98 493 4039"
-                    autocomplete="tel-national"
-                    inputmode="tel"
-                    @input="onPhoneInput"
-                    @blur="onBlur('phone')"
-                  />
-
-                  <span class="rmodal__phone-status" :class="{ valid: phoneValid, invalid: touched.phone && !phoneValid && form.phone }" aria-hidden="true">
-                    <svg v-if="phoneValid" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    <svg v-else-if="touched.phone && !phoneValid && form.phone" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                  </span>
-                </div>
-                <span v-if="touched.phone && errors.phone" class="rmodal__error">{{ errors.phone }}</span>
+              <div class="rmodal__field" :class="{ 'has-error': touched.apellido && errors.apellido }">
+                <label for="r-apellido">Apellido</label>
+                <input
+                  id="r-apellido"
+                  v-model="form.apellido"
+                  type="text"
+                  placeholder="Pérez"
+                  autocomplete="family-name"
+                  @blur="onBlur('apellido')"
+                />
+                <span v-if="touched.apellido && errors.apellido" class="rmodal__error">{{ errors.apellido }}</span>
               </div>
+            </div>
 
-              <button class="rmodal__submit" type="submit" :disabled="submitting">
-                <svg v-if="submitting" class="rmodal__spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                </svg>
-                <template v-else>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="20 6 9 17 4 12"/>
+            <!-- Email -->
+            <div class="rmodal__field" :class="{ 'has-error': touched.email && errors.email }">
+              <label for="r-email">Correo electrónico</label>
+              <input
+                id="r-email"
+                v-model="form.email"
+                type="email"
+                placeholder="juan@empresa.com"
+                autocomplete="email"
+                @blur="onBlur('email')"
+              />
+              <span v-if="touched.email && errors.email" class="rmodal__error">{{ errors.email }}</span>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="rmodal__field" :class="{ 'has-error': touched.phone && errors.phone }">
+              <label>Teléfono</label>
+              <div class="rmodal__phone-wrap">
+                <button
+                  type="button"
+                  class="rmodal__country-trigger"
+                  :aria-expanded="dropdownOpen"
+                  aria-haspopup="listbox"
+                  @click="dropdownOpen = !dropdownOpen"
+                >
+                  <span class="rmodal__flag">{{ selectedCountry.flag }}</span>
+                  <span class="rmodal__dial">{{ selectedCountry.dial }}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="rmodal__chevron" :class="{ open: dropdownOpen }">
+                    <polyline points="6 9 12 15 18 9"/>
                   </svg>
-                </template>
-                {{ submitting ? 'Enviando...' : 'ACCEDER AL VIDEO Y DIAGNÓSTICO' }}
-              </button>
+                </button>
 
-              <p class="rmodal__legal">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-                100% gratuito · Sin compromiso · Tus datos están seguros
-              </p>
-            </form>
-          </template>
+                <Transition name="dropdown">
+                  <div v-if="dropdownOpen" class="rmodal__country-dropdown" role="listbox">
+                    <input type="text" class="rmodal__country-search" v-model="countrySearch" placeholder="Buscar país..." aria-label="Buscar país" />
+                    <ul>
+                      <li v-for="c in filteredCountries" :key="c.code" :class="['rmodal__country-item', { separator: c.code === '---', active: c.code === selectedCountry.code }]" role="option" :aria-selected="c.code === selectedCountry.code" @click="selectCountry(c)">
+                        <template v-if="c.code !== '---'">
+                          <span class="rmodal__flag">{{ c.flag }}</span>
+                          <span class="rmodal__country-name">{{ c.name }}</span>
+                          <span class="rmodal__country-dial">{{ c.dial }}</span>
+                        </template>
+                        <template v-else>
+                          <span class="rmodal__sep-line" aria-hidden="true" />
+                        </template>
+                      </li>
+                    </ul>
+                  </div>
+                </Transition>
+
+                <input class="rmodal__phone-input" type="tel" :value="form.phone" placeholder="98 493 4039" autocomplete="tel-national" inputmode="tel" @input="onPhoneInput" @blur="onBlur('phone')" />
+
+                <span class="rmodal__phone-status" :class="{ valid: phoneValid, invalid: touched.phone && !phoneValid && form.phone }" aria-hidden="true">
+                  <svg v-if="phoneValid" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg v-else-if="touched.phone && !phoneValid && form.phone" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </div>
+              <span v-if="touched.phone && errors.phone" class="rmodal__error">{{ errors.phone }}</span>
+              <span v-if="phoneValid && parsedPhoneE164" class="rmodal__phone-preview">
+                {{ selectedCountry.flag }} {{ selectedCountry.dial }} {{ formattedPhone }} · E.164: {{ parsedPhoneE164 }}
+              </span>
+            </div>
+
+            <!-- Empresa -->
+            <div class="rmodal__field" :class="{ 'has-error': touched.empresa && errors.empresa }">
+              <label for="r-empresa">Nombre de tu proyecto</label>
+              <input
+                id="r-empresa"
+                v-model="form.empresa"
+                type="text"
+                placeholder="Ej: Fachada Corporativa"
+                autocomplete="organization"
+                @blur="onBlur('empresa')"
+              />
+              <span v-if="touched.empresa && errors.empresa" class="rmodal__error">{{ errors.empresa }}</span>
+            </div>
+
+            <!-- Urgencia -->
+            <div class="rmodal__field rmodal__field--urgency" :class="{ 'has-error': touched.urgencia && errors.urgencia }">
+              <label class="rmodal__urgency-label">
+                <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                ¿Cuándo necesitas ejecutar tu proyecto?
+              </label>
+              <div class="rmodal__urgency-opts" role="radiogroup">
+                <label
+                  v-for="opt in urgencyOpts"
+                  :key="opt.value"
+                  class="rmodal__urgency-opt"
+                  :class="{
+                    'rmodal__urgency-opt--sel': form.urgencia === opt.value,
+                    'rmodal__urgency-opt--hot': opt.hot,
+                    'rmodal__urgency-opt--hot-sel': opt.hot && form.urgencia === opt.value,
+                  }"
+                >
+                  <input type="radio" v-model="form.urgencia" :value="opt.value" class="rmodal__urgency-radio sr-only" @change="onBlur('urgencia')" />
+                  <span class="rmodal__urgency-opt-dot" aria-hidden="true"></span>
+                  <span class="rmodal__urgency-opt-text">
+                    <strong>{{ opt.label }}</strong>
+                    <small>{{ opt.sub }}</small>
+                  </span>
+                  <i v-if="opt.hot" class="fa-solid fa-fire rmodal__urgency-opt-flame" aria-hidden="true"></i>
+                </label>
+              </div>
+              <span v-if="touched.urgencia && errors.urgencia" class="rmodal__error">{{ errors.urgencia }}</span>
+            </div>
+
+            <!-- Submit -->
+            <button class="rmodal__submit" :class="{ 'rmodal__submit--urgent': form.urgencia === 'inmediato' }" type="submit" :disabled="submitting">
+              <svg v-if="submitting" class="rmodal__spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              <template v-else>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </template>
+              {{ submitting ? 'Enviando...' : 'ACCEDER AL VIDEO' }}
+            </button>
+
+            <p class="rmodal__legal">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              100% gratuito · Sin compromiso · Tus datos están seguros
+            </p>
+
+          </form>
 
         </div>
       </div>
@@ -645,7 +491,7 @@ $accent: colors.$OS-RED;
 .rmodal {
   position: relative;
   width: 100%;
-  max-width: 560px;
+  max-width: 520px;
   background: $bg;
   border: 1px solid $border;
   border-radius: 24px;
@@ -678,9 +524,7 @@ $accent: colors.$OS-RED;
   &:hover { border-color: rgba($accent, 0.4); color: $accent; background: rgba($accent, 0.06); }
 }
 
-.rmodal__header {
-  margin-bottom: 1.5rem;
-}
+.rmodal__header { margin-bottom: 1rem; }
 
 .rmodal__eyebrow {
   font-family: fonts.$font-accent;
@@ -714,7 +558,7 @@ $accent: colors.$OS-RED;
 .rmodal__form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .rmodal__row {
@@ -722,109 +566,6 @@ $accent: colors.$OS-RED;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   @media (max-width: 400px) { grid-template-columns: 1fr; }
-}
-
-.rmodal__fieldset {
-  border: none;
-  padding: 0;
-  margin: 0;
-
-  &.has-error .rmodal__options { border-color: $accent; }
-}
-
-.rmodal__legend {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: fonts.$font-interface;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: colors.$OS-DARK;
-  margin-bottom: 0.75rem;
-}
-
-.rmodal__q-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: colors.$OS-NAVY;
-  color: #ffffff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.rmodal__options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.rmodal__option {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  border: 1.5px solid #E4EDF7;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: border-color 0.18s, background 0.18s;
-  background: #FAFBFF;
-
-  &:hover { border-color: colors.$OS-BLUE; background: #F0F6FF; }
-
-  &.selected {
-    border-color: colors.$OS-NAVY;
-    background: #EEF4FF;
-  }
-
-  &--warn.selected {
-    border-color: #E6A817;
-    background: #FFFBEB;
-  }
-
-  &--danger.selected {
-    border-color: colors.$OS-RED;
-    background: #FFF0F0;
-  }
-
-  &-radio {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 2px solid #C8D8ED;
-    flex-shrink: 0;
-    position: relative;
-    transition: border-color 0.18s;
-
-    .rmodal__option.selected & {
-      border-color: colors.$OS-NAVY;
-      &::after {
-        content: '';
-        position: absolute;
-        inset: 3px;
-        border-radius: 50%;
-        background: colors.$OS-NAVY;
-      }
-    }
-
-    .rmodal__option--danger.selected & {
-      border-color: colors.$OS-RED;
-      &::after { background: colors.$OS-RED; }
-    }
-  }
-
-  &-label {
-    font-size: 0.88rem;
-    color: #3A4F6A;
-    font-weight: 500;
-    line-height: 1.3;
-
-    .rmodal__option.selected & { color: colors.$OS-DARK; font-weight: 600; }
-  }
 }
 
 .rmodal__field {
@@ -897,13 +638,10 @@ $accent: colors.$OS-RED;
 }
 
 .rmodal__flag { font-size: 1.1rem; line-height: 1; }
+
 .rmodal__dial { font-family: fonts.$font-accent; font-size: 0.82rem; font-weight: 600; color: #4a5f7a; }
 
-.rmodal__chevron {
-  opacity: 0.4;
-  transition: transform 0.2s ease;
-  &.open { transform: rotate(180deg); opacity: 0.7; }
-}
+.rmodal__chevron { opacity: 0.4; transition: transform 0.2s ease; &.open { transform: rotate(180deg); opacity: 0.7; } }
 
 .rmodal__country-dropdown {
   position: absolute;
@@ -961,12 +699,7 @@ $accent: colors.$OS-RED;
   &.separator { padding: 4px 10px; cursor: default; }
 }
 
-.rmodal__sep-line {
-  display: block;
-  height: 1px;
-  width: 100%;
-  background: rgba(255,255,255,0.07);
-}
+.rmodal__sep-line { display: block; height: 1px; width: 100%; background: rgba(255,255,255,0.07); }
 
 .rmodal__country-name {
   font-family: fonts.$font-secondary;
@@ -978,12 +711,7 @@ $accent: colors.$OS-RED;
   text-overflow: ellipsis;
 }
 
-.rmodal__country-dial {
-  font-family: fonts.$font-accent;
-  font-size: 0.75rem;
-  color: #a0b0c5;
-  flex-shrink: 0;
-}
+.rmodal__country-dial { font-family: fonts.$font-accent; font-size: 0.75rem; color: #a0b0c5; flex-shrink: 0; }
 
 .rmodal__phone-input {
   flex: 1;
@@ -1016,6 +744,30 @@ $accent: colors.$OS-RED;
   &.invalid { background: rgba(255, 80, 100, 0.1); color: #ff6680; }
 }
 
+.rmodal__phone-preview {
+  font-family: fonts.$font-interface;
+  font-size: 0.68rem;
+  color: #10b981;
+  padding: 2px 0;
+}
+
+// ── Timer bar ─────────────────────────────────────────────────────────────────
+.rmodal__timer-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(colors.$OS-BLUE, 0.05);
+  border: 1px solid rgba(colors.$OS-BLUE, 0.15);
+  border-radius: 8px;
+  font-family: fonts.$font-interface;
+  font-size: 0.76rem;
+  color: colors.$OS-NAVY;
+  i { color: colors.$OS-BLUE; font-size: 0.75rem; flex-shrink: 0; }
+  strong { font-weight: 700; }
+}
+
+// ── Submit ─────────────────────────────────────────────────────────────────────
 .rmodal__submit {
   width: 100%;
   display: flex;
@@ -1042,6 +794,18 @@ $accent: colors.$OS-RED;
   &:disabled { opacity: 0.7; cursor: not-allowed; }
 }
 
+.rmodal__submit--urgent {
+  background: linear-gradient(90deg, colors.$ALU-URGENT 0%, colors.$ALU-URGENT-DARK 100%);
+  box-shadow: 0 8px 28px rgba(colors.$ALU-URGENT, 0.45);
+  animation: urgent-pulse 2s ease-in-out infinite;
+  &:hover:not(:disabled) { box-shadow: 0 14px 40px rgba(colors.$ALU-URGENT, 0.6); }
+}
+
+@keyframes urgent-pulse {
+  0%, 100% { box-shadow: 0 8px 28px rgba(colors.$ALU-URGENT, 0.45); }
+  50%      { box-shadow: 0 8px 44px rgba(colors.$ALU-URGENT, 0.7); }
+}
+
 @keyframes spin { to { transform: rotate(360deg); } }
 .rmodal__spinner { animation: spin 0.8s linear infinite; }
 
@@ -1057,78 +821,7 @@ $accent: colors.$OS-RED;
   svg { opacity: 0.5; flex-shrink: 0; }
 }
 
-// ── Disqualification ──────────────────────────────────────────────────────────
-.rmodal__disq {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 1rem;
-  padding: 1rem 0;
-}
-
-.rmodal__disq-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #FFF0F0;
-  border: 1.5px solid rgba(colors.$OS-RED, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: colors.$OS-RED;
-}
-
-.rmodal__disq-title {
-  font-family: fonts.$font-principal;
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: colors.$OS-DARK;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.rmodal__disq-text {
-  font-size: 0.9rem;
-  color: #4A5F7A;
-  line-height: 1.6;
-  margin: 0;
-  max-width: 440px;
-
-  strong { color: colors.$OS-DARK; }
-}
-
-.rmodal__disq-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: transparent;
-  border: 1.5px solid colors.$OS-NAVY;
-  border-radius: 10px;
-  padding: 0.7rem 1.5rem;
-  font-family: fonts.$font-interface;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: colors.$OS-NAVY;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  &:hover { background: colors.$OS-NAVY; color: #ffffff; }
-}
-
-.rmodal__disq-divider {
-  width: 100%;
-  border: none;
-  border-top: 1px solid #E4EDF7;
-  margin: 0.5rem 0;
-}
-
-.rmodal__disq-legal {
-  font-size: 0.76rem;
-  color: #A0B0C5;
-  margin: 0;
-  a { color: colors.$OS-NAVY; font-weight: 600; }
-}
-
+// ── Urgency field ─────────────────────────────────────────────────────────────
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1139,6 +832,94 @@ $accent: colors.$OS-RED;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+.rmodal__field--urgency { gap: 8px; }
+
+.rmodal__urgency-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  i { color: colors.$ALU-URGENT; font-size: 0.78rem; }
+}
+
+.rmodal__urgency-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rmodal__urgency-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  background: $input-bg;
+  border: 1px solid $border;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, transform 0.15s, box-shadow 0.2s;
+  position: relative;
+
+  &:hover { border-color: rgba($accent, 0.4); background: rgba($accent, 0.04); }
+
+  &--sel {
+    border-color: $accent;
+    background: rgba($accent, 0.08);
+    box-shadow: 0 0 0 3px rgba($accent, 0.08);
+  }
+
+  &--hot {
+    border-color: rgba(colors.$ALU-URGENT, 0.35);
+    background: colors.$ALU-URGENT-BG;
+
+    &:hover { border-color: colors.$ALU-URGENT; background: rgba(colors.$ALU-URGENT, 0.08); }
+  }
+
+  &--hot-sel {
+    border-color: colors.$ALU-URGENT !important;
+    background: rgba(colors.$ALU-URGENT, 0.12) !important;
+    box-shadow: 0 0 0 3px rgba(colors.$ALU-URGENT, 0.18) !important;
+
+    .rmodal__urgency-opt-dot {
+      border-color: colors.$ALU-URGENT;
+      background: colors.$ALU-URGENT;
+      box-shadow: inset 0 0 0 3px #ffffff;
+    }
+
+    .rmodal__urgency-opt-text strong { color: colors.$ALU-URGENT-DARK; }
+  }
+}
+
+.rmodal__urgency-opt-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid #c5d3e3; background: #ffffff; flex-shrink: 0;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+
+  .rmodal__urgency-opt--sel & {
+    border-color: $accent; background: $accent; box-shadow: inset 0 0 0 3px #ffffff;
+  }
+}
+
+.rmodal__urgency-opt-text {
+  display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;
+
+  strong {
+    font-family: fonts.$font-interface; font-size: 0.88rem; font-weight: 700;
+    color: colors.$OS-DARK; line-height: 1.25;
+  }
+
+  small { font-family: fonts.$font-secondary; font-size: 0.74rem; color: $text-muted; }
+}
+
+.rmodal__urgency-opt-flame {
+  color: colors.$ALU-URGENT; font-size: 0.95rem; flex-shrink: 0;
+  animation: flame-flicker 1.6s infinite;
+}
+
+@keyframes flame-flicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.92); }
 }
 
 .rmodal-fade-enter-active {

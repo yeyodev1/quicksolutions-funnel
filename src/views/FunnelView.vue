@@ -16,6 +16,7 @@ const openModal = () => {
       return
     }
   }
+  ;(window as any).fbq?.('track', 'CompleteRegistration', { content_name: 'cta-abrir-registro' })
   modalOpen.value = true
 }
 
@@ -111,6 +112,7 @@ const tick = () => {
 
 onMounted(() => {
   captureFbParams()
+  sessionStorage.setItem('alu_page_entry', String(Date.now()))
   tick()
   interval = setInterval(tick, 1000)
   startProofRotation()
@@ -669,7 +671,7 @@ const dismissProof = () => {
   position: fixed;
   bottom: 1rem;
   left: 1rem;
-  z-index: 55;
+  z-index: 1100;
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;

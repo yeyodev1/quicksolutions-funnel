@@ -71,6 +71,7 @@ const startTimer = () => {
       secondsLeft.value--
     } else {
       ctaUnlocked.value = true
+      ;(window as any).fbq?.('track', 'CompleteRegistration', { content_name: 'video-completado' })
       if (timer) clearInterval(timer)
     }
   }, 1000)

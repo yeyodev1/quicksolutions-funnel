@@ -26,6 +26,7 @@ const calendarUrl = computed(() => {
 const onMessage = (event: MessageEvent) => {
   if (Array.isArray(event.data) && event.data[0] === 'msgsndr-booking-complete') {
     localStorage.setItem('os_booked_at', String(Date.now()))
+    ;(window as any).fbq?.('track', 'CompleteRegistration', { content_name: 'cita-agendada' })
     router.push('/cita-confirmada')
   }
   if (event.data?.type === 'booking-app' && typeof event.data.height === 'number') {
