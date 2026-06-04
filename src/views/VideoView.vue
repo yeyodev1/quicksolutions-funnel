@@ -44,6 +44,7 @@ const submitCapture = async () => {
     negocio: c.negocio,
     email: c.email,
     telefono: c.telefono,
+    phone: c.telefono,
     event_id: leadEventId,
   })
   ;(window as any).fbq?.('track', 'Lead', { content_name: 'video-gate' }, { eventID: leadEventId })

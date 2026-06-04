@@ -210,6 +210,7 @@ const handleSubmit = async () => {
     apellido: form.value.apellido.trim(),
     email: form.value.email.trim().toLowerCase(),
     telefono: parsedPhoneE164.value,
+    phone: parsedPhoneE164.value,
     telefonoDisplay: selectedCountry.value.dial + ' ' + formattedPhone.value,
     empresa: form.value.empresa.trim(),
     pais: selectedCountry.value.name,
@@ -239,8 +240,10 @@ const handleSubmit = async () => {
 
   localStorage.setItem('os_contact', JSON.stringify({
     nombre: form.value.nombre.trim(),
+    apellido: form.value.apellido.trim(),
+    negocio: form.value.empresa.trim(),
     email: form.value.email.trim().toLowerCase(),
-    phone: parsedPhoneE164.value,
+    telefono: parsedPhoneE164.value,
     timestamp: Date.now(),
   }))
   ;(window as any).fbq?.('track', 'CompleteRegistration')

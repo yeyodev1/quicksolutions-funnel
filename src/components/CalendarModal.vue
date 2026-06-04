@@ -101,6 +101,7 @@ ${califica ? '✅ CALIFICA — Ingeniería completa' : '❌ NO CALIFICA — Pres
     apellido: contact.apellido,
     email: contact.email,
     telefono: contact.telefono,
+    phone: contact.telefono,
     tipo: form.value.tipo,
     alcance: form.value.alcance,
     presupuesto: form.value.presupuesto,
